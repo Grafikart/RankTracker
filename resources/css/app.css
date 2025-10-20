@@ -41,6 +41,9 @@
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
 
+    --color-assertive: var(--assertive);
+    --color-assertive-foreground: var(--assertive-foreground);
+
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
@@ -78,6 +81,8 @@
     --accent-foreground: oklch(0.3015 0.0572 282.4176);
     --destructive: oklch(0.6861 0.2061 14.9941);
     --destructive-foreground: oklch(1.0000 0 0);
+    --assertive: oklch(0.686 0.133 159.88);
+    --assertive-foreground: oklch(1.0000 0 0);
     --border: oklch(0.9115 0.0216 285.9625);
     --input: oklch(0.9115 0.0216 285.9625);
     --ring: oklch(0.5417 0.1790 288.0332);
@@ -185,5 +190,10 @@
 
     button {
         cursor: pointer;
+    }
+
+    strong {
+        font-weight: 700;
+        color: var(--color-foreground);
     }
 }

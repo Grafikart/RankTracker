@@ -6,6 +6,18 @@ export interface Auth {
     user: User;
 }
 
+export type PaginatedCollection<T> = {
+    data: T[];
+    current_page: number;
+    total: number;
+    links: {
+        url: string | null;
+        label: string;
+        page: number | null
+        active: boolean;
+    }[];
+};
+
 export interface BreadcrumbItem {
     title: string;
     href: string;

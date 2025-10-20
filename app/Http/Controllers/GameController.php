@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Data\In\GameStoreData;
+use App\Data\Out\GameOutData;
 use App\Data\Out\PlayerOutData;
 use App\Models\Game;
 use App\Models\Player;
@@ -12,15 +13,22 @@ use Laragod\Skills\GameInfo;
 use Laragod\Skills\Player as RankingPlayer;
 use Laragod\Skills\Rating;
 use Laragod\Skills\Team;
-use Laragod\Skills\Teams;
 use Laragod\Skills\TrueSkill\TwoTeamTrueSkillCalculator;
 
 class GameController extends Controller
 {
+    public function index()
+    {
+        $games = Game::with('players')->orderByDesc('created_at')->paginate(10);
+        return Inertia::render('game/index', [
+            'games' => Inertia::scroll(fn () => GameOutData::collect($games))
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('game/create', [
-            'players' => PlayerOutData::collect(Player::all())
+            'players' => PlayerOutData::collectRanked(Player::all())
         ]);
     }
 
@@ -81,11 +89,13 @@ class GameController extends Controller
                     // Update the player's rating
                     $player->mu = $rating->getMean();
                     $player->sigma = $rating->getStandardDeviation();
+                    $player->games_count = $player->games_count + 1;
+                    $player->last_match_at = now();
                     $player->save();
                 }
             }
         });
 
-        return to_route('game.create')->with('success', 'Le match a bien été enregistré');
+        return to_route('player.index')->with('success', 'Le match a bien été enregistré');
     }
 }

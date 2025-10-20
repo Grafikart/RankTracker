@@ -1,29 +1,31 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
     Item,
     ItemActions,
-    ItemContent, ItemDescription,
+    ItemContent,
+    ItemDescription,
     ItemTitle,
 } from '@/components/ui/item';
+import { Separator } from '@/components/ui/separator';
 import { useList } from '@/hooks/use-list';
+import FrontLayout from '@/layouts/front-layout';
 import { chunk } from '@/lib/array';
+import { TEAM_SIZE } from '@/lib/game';
+import { cn } from '@/lib/utils';
+import games from '@/routes/game';
 import type { PlayerOutData } from '@/types';
+import { Form } from '@inertiajs/react';
 import {
+    AwardIcon,
     CircleAlertIcon,
-    CoinsIcon,
     PlusIcon,
     TrashIcon,
     XIcon,
 } from 'lucide-react';
-import { quality, Rating } from 'ts-trueskill';
-import FrontLayout from '@/layouts/front-layout';
-import { Input } from '@/components/ui/input';
-import { TEAM_SIZE } from '@/lib/game';
-import { Form } from '@inertiajs/react';
-import games from '@/routes/game';
-import { Separator } from '@/components/ui/separator';
 import { Fragment, type ReactNode } from 'react';
+import { Rating, winProbability } from 'ts-trueskill';
 
 type Props = {
     players: PlayerOutData[];
@@ -32,17 +34,23 @@ type Props = {
 const idMapper = (player: { id: number }) => player.id;
 
 function CreateGame({ players }: Props) {
-    const [selectedPlayers, togglePlayer] = useList<PlayerOutData>([
-    ]);
+    const [selectedPlayers, togglePlayer] = useList<PlayerOutData>([]);
     const selectedIds = selectedPlayers.map(idMapper);
     const availablePlayers = players.filter((p) => !selectedIds.includes(p.id));
-    const maxPlayers = TEAM_SIZE * 2
+    const maxPlayers = TEAM_SIZE * 2;
 
     return (
-            <div className="space-y-4">
-                <h1 className="text-lg font-bold">Créer un match</h1>
-                    <Game players={selectedPlayers} onDelete={togglePlayer} />
-                {selectedPlayers.length < maxPlayers && <div>
+        <div className="space-y-2">
+            <h1 className="flex items-center gap-1 text-lg font-bold">
+                <AwardIcon />
+                Créer un match
+            </h1>
+            <p className="text-muted-foreground">
+                Sélectionnez les joueurs qui participent au match (commencez par la première équipe)
+            </p>
+            <Game players={selectedPlayers} onDelete={togglePlayer} />
+            {selectedPlayers.length < maxPlayers && (
+                <div>
                     {availablePlayers.map((player) => (
                         <Item
                             key={player.id}
@@ -50,10 +58,11 @@ function CreateGame({ players }: Props) {
                             className="rounded-none border-b-0 last:border-b-1"
                         >
                             <ItemContent className="flex-row gap-2">
-                                <ItemTitle className="font-semibold">{player.name}</ItemTitle>
+                                <ItemTitle className="font-semibold">
+                                    {player.name}
+                                </ItemTitle>
                                 <ItemDescription className="flex items-center text-sm">
-                                   (<CoinsIcon size={14} className="mr-1" />
-                                    {player.score})
+                                    #{player.rank}
                                 </ItemDescription>
                             </ItemContent>
                             <ItemActions>
@@ -69,33 +78,30 @@ function CreateGame({ players }: Props) {
                             </ItemActions>
                         </Item>
                     ))}
-                </div>}
-            </div>
+                </div>
+            )}
+        </div>
     );
 }
 
-CreateGame.layout = (page: ReactNode) => <FrontLayout>{page}</FrontLayout>
+CreateGame.layout = (page: ReactNode) => <FrontLayout>{page}</FrontLayout>;
 
 export default CreateGame;
 
 type GameProps = {
     players: PlayerOutData[];
     onDelete: (player: PlayerOutData) => void;
-}
+};
 
 function Game({ players, onDelete }: GameProps) {
     const teams = chunk(players, 2);
-    const q = players.length === TEAM_SIZE * 2 ? quality(chunk(players.map(playerToRating),  2)) : 1;
+    const isMatchReady = players.length === TEAM_SIZE * 2;
+    const teamRatings = chunk(players.map(playerToRating), 2);
+    const winChance = isMatchReady ? winProbability(teamRatings[0], teamRatings[1]) : null;
     return (
         <Form className="space-y-4" action={games.store()}>
-            {q < 0.4 && (
-                <Alert>
-                    <CircleAlertIcon />
-                    <AlertTitle>Attention !</AlertTitle>
-                    <AlertDescription>
-                        Le match semble déséquilibré
-                    </AlertDescription>
-                </Alert>
+            {winChance && (
+                <WinProbability chance={winChance}/>
             )}
             <div className="mx-auto flex w-max items-center gap-4">
                 {teams.map((team, k) => (
@@ -114,24 +120,60 @@ function Game({ players, onDelete }: GameProps) {
                                             className="size-8 rounded-sm"
                                             onClick={() => onDelete(player)}
                                         >
-                                            <TrashIcon className="size-3"/>
+                                            <TrashIcon className="size-3" />
                                         </Button>
                                     </ItemActions>
-                                    <input name={`team${k+1}[]`} type="hidden" value={player.id} />
+                                    <input
+                                        name={`team${k + 1}[]`}
+                                        type="hidden"
+                                        value={player.id}
+                                    />
                                 </Item>
                             ))}
-                            <Separator />
-                            <Input required type="number" placeholder="Score" name={`team${k+1}_score`} className="w-40" defaultValue={k === 0 ? 2 : 0}/>
+                            {isMatchReady && <Separator />}
+                            {isMatchReady && (
+                                <Input
+                                    required
+                                    type="number"
+                                    placeholder="Score"
+                                    name={`team${k + 1}_score`}
+                                    className="w-30"
+                                />
+                            )}
                         </div>
-                        {k === 0 && <XIcon className="text-muted-foreground -mt-16" />}
+                        {k === 0 && teams.length > 1 && (
+                            <XIcon
+                                className={cn(
+                                    'text-muted-foreground',
+                                    isMatchReady && '-mt-16',
+                                )}
+                            />
+                        )}
                     </Fragment>
                 ))}
             </div>
-            <Button className="w-full" type="submit">
-                Enregistrer le match
-            </Button>
+            {isMatchReady && (
+                <Button className="w-full" type="submit">
+                    <PlusIcon /> Enregistrer le résultat
+                </Button>
+            )}
         </Form>
     );
+}
+
+function WinProbability({chance}: {chance: number}) {
+    const favoriteTeam = chance > 0.5 ? 1 : 2;
+    const winingTeamChange = chance > 0.5 ? chance : 1 - chance
+    return (
+        <Alert>
+            <CircleAlertIcon />
+            <AlertDescription>
+                <p>
+                    L'<strong>équipe {favoriteTeam}</strong> est favorite avec <strong>{Math.round(winingTeamChange * 100)}%</strong> de chance de gagner.
+                </p>
+            </AlertDescription>
+        </Alert>
+    )
 }
 
 function playerToRating(player: PlayerOutData) {

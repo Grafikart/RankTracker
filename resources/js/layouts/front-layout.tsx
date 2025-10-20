@@ -1,9 +1,10 @@
-import { type ReactNode, useEffect } from 'react';
-import { usePage } from '@inertiajs/react';
 import type { SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
+import { type ReactNode, useEffect } from 'react';
 import { toast } from 'sonner';
+import Header from '@/components/header';
 
-export default function FrontLayout({children}: {children: ReactNode}) {
+export default function FrontLayout({ children }: { children: ReactNode }) {
     const page = usePage<SharedData>();
 
     useEffect(() => {
@@ -15,7 +16,10 @@ export default function FrontLayout({children}: {children: ReactNode}) {
         }
     }, [page.props.flash]);
 
-    return <div className="p-4">
-        {children}
-    </div>
+    return (
+        <>
+            <Header/>
+            <div className="p-4">{children}</div>
+        </>
+    );
 }

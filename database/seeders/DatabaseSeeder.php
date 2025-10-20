@@ -2,20 +2,18 @@
 
 namespace Database\Seeders;
 
+use App\Models\Player;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
+    use WithoutModelEvents;
+
     public function run(): void
     {
-        // User::factory(10)->create();
-
         User::firstOrCreate(
             ['email' => 'john@doe.fr'],
             [
@@ -24,5 +22,9 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        Player::factory(10)
+            ->sequence(fn ($sequence) => ['name' => sprintf("Player %s", $sequence->index + 1)])
+            ->create();
     }
 }

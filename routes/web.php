@@ -7,6 +7,8 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+Route::resource('game', \App\Http\Controllers\GameController::class)->only(['index', 'create', 'store', 'destroy']);
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

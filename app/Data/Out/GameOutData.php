@@ -27,7 +27,7 @@ class GameOutData extends Data
         return self::from(
             $game,
             [
-                'deletable' => request()->user()?->can('delete', $game),
+                'deletable' => (bool) request()->user()?->can('delete', $game),
                 'team1' => $game->players->where('pivot.team', 1)->values(),
                 'team2' => $game->players->where('pivot.team', 2)->values(),
             ],

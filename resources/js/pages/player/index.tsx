@@ -1,25 +1,36 @@
 import { PlayerAvatar } from '@/components/player-avatar';
 import { Button } from '@/components/ui/button';
+import { FormField } from '@/components/ui/form-field';
+import { Input } from '@/components/ui/input';
 import {
     Item,
     ItemContent,
     ItemDescription,
     ItemTitle,
 } from '@/components/ui/item';
+import { Spinner } from '@/components/ui/spinner';
 import FrontLayout from '@/layouts/front-layout';
 import gameRoutes from '@/routes/game';
-import { show } from '@/routes/player';
+import { show, store } from '@/routes/player';
 import type { PlayerOutData } from '@/types';
-import { Link } from '@inertiajs/react';
-import { AwardIcon, CoinsIcon, LandPlot, ListChecksIcon } from 'lucide-react';
+import { Form, Link } from '@inertiajs/react';
+import {
+    AwardIcon,
+    CoinsIcon,
+    LandPlot,
+    ListChecksIcon,
+    UserPlusIcon,
+} from 'lucide-react';
 import type { ReactNode } from 'react';
 
 function index({
     players,
     games,
+    can_create,
 }: {
     players: PlayerOutData[];
     games: number;
+    can_create: boolean;
 }) {
     return (
         <div className="space-y-5">
@@ -37,6 +48,29 @@ function index({
                     </Button>
                 )}
             </div>
+            {can_create && (
+                <Form action={store()}>
+                    {({ processing, errors, isDirty }) => (
+                        <FormField error={errors.name}>
+                            <Input
+                                name="name"
+                                placeholder="Ajouter un joueur"
+                                aria-invalid={!!errors.name}
+                            />
+                            {isDirty && (
+                                <Button disabled={processing}>
+                                    {processing ? (
+                                        <Spinner />
+                                    ) : (
+                                        <UserPlusIcon />
+                                    )}{' '}
+                                    Ajouter le joueur
+                                </Button>
+                            )}
+                        </FormField>
+                    )}
+                </Form>
+            )}
             <div className="space-y-2">
                 {players.map((player) => (
                     <PlayerCard player={player} key={player.id} />

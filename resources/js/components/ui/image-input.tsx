@@ -4,19 +4,23 @@ import { cn } from '@/lib/utils';
 import { UploadIcon } from 'lucide-react';
 import  { type ChangeEventHandler, useState } from 'react';
 
-function ImageInput({ className, defaultValue, ...props }: React.ComponentProps<"input">) {
+type Props = {
+    onFileChange?: (file: File) => void;
+} & React.ComponentProps<"input">
+
+function ImageInput({ className, defaultValue, ...props }: Props) {
     const [preview, setPreview] = useState(defaultValue as string)
     const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
         const target = event.target as HTMLInputElement
         if (target.files && target.files.length > 0) {
             const file = target.files[0]
-            console.log(target, URL.createObjectURL(file))
             setPreview(URL.createObjectURL(file))
+            props.onFileChange?.(file)
         }
     }
 
     return (
-        <div className={cn(className, 'group bg-muted relative rounded-md flex items-center justify-center cursor-pointer', props['aria-invalid'] && 'ring-destructive/20 dark:ring-destructive/40', 'border-destructive')}>
+        <div className={cn('group bg-muted relative rounded-md flex items-center justify-center cursor-pointer', props['aria-invalid'] && 'ring-destructive/20 dark:ring-destructive/40', 'border-destructive', className)}>
             <input
                 onChange={handleChange}
                 type="file"

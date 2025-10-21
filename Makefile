@@ -5,6 +5,11 @@ export
 seed:
 	php artisan migrate:fresh --seed
 
+lint:
+	vendor/bin/pint
+	bun run format
+	bun run lint
+
 .PHONY: deploy
 deploy: ## Deploy a new version on the server
 	bun run build

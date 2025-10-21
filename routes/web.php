@@ -9,6 +9,7 @@ Route::resource('player', \App\Http\Controllers\PlayerController::class)->only([
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('game', \App\Http\Controllers\GameController::class)->only(['create', 'store', 'destroy']);
+    Route::resource('player', \App\Http\Controllers\PlayerController::class)->only(['update', 'store']);
 });
 
 /*

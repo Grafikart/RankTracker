@@ -19,4 +19,5 @@ export type PlayerOutData = {
     sigma: number;
     score: number;
     games_count: number;
+    avatar?: string;
 };

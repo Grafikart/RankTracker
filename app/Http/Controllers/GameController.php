@@ -33,7 +33,7 @@ class GameController extends Controller
         Gate::authorize('create', Game::class);
 
         return Inertia::render('game/create', [
-            'players' => PlayerOutData::collectRanked(Player::all()),
+            'players' => PlayerOutData::collectRanked(Player::with('media')->get()),
         ]);
     }
 
@@ -66,8 +66,8 @@ class GameController extends Controller
         // Compute the new ratings
         $gameInfo = new GameInfo;
         $calculator = new TwoTeamTrueSkillCalculator;
-        $ranks = $data->team1_score > $data->team2_score ? [1, 2] : [2, 1];
-        $ratings = $calculator->calculateNewRatings($gameInfo, $teams->toArray(), $ranks);
+        // Rank is reversed, the best score is the winner (first place).
+        $ratings = $calculator->calculateNewRatings($gameInfo, $teams->toArray(), [$data->team2_score, $data->team1_score]);
 
         // Create the game
         DB::transaction(function () use ($data, $playersById, $ratings, $rankingPlayers) {

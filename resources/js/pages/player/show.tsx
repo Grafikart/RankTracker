@@ -10,27 +10,47 @@ import {
     EmptyTitle,
 } from '@/components/ui/empty';
 import { Icon } from '@/components/ui/icon';
+import { ImageInput } from '@/components/ui/image-input';
+import { ValidationErrors } from '@/components/ui/validation-errors';
 import FrontLayout from '@/layouts/front-layout';
 import { create } from '@/routes/game';
-import type { GameOutData, GamePlayerData, PaginatedCollection } from '@/types';
-import { InfiniteScroll, Link } from '@inertiajs/react';
+import { update } from '@/routes/player';
+import type { GameOutData, PaginatedCollection, PlayerOutData } from '@/types';
+import { InfiniteScroll, Link, router } from '@inertiajs/react';
 import { BadgePlusIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 type Props = {
-    player: GamePlayerData;
+    player: PlayerOutData;
     games: PaginatedCollection<GameOutData>;
+    editable: boolean;
 };
 
-function show({ player, games }: Props) {
+function show({ player, games, editable }: Props) {
+    const onFileChange = (file: File) => {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        formData.append('_method', 'PUT');
+        router.post(update({ player: player.id }).url, formData);
+    };
+
     return (
         <div className="space-y-6">
-            <h1 className="flex items-center gap-4 text-2xl font-bold font-normal text-muted-foreground">
-                <PlayerAvatar {...player} className="size-12" />
+            <h1 className="flex items-center gap-4 text-2xl font-normal text-muted-foreground">
+                {editable ? (
+                    <ImageInput
+                        onFileChange={onFileChange}
+                        defaultValue={player.avatar}
+                        className="size-12 overflow-hidden rounded-lg"
+                    />
+                ) : (
+                    <PlayerAvatar {...player} className="size-12" />
+                )}
                 <span>
                     Matchs de <strong>{player.name}</strong>
                 </span>
             </h1>
+            <ValidationErrors prefix="avatar" />
             {games.data.length === 0 && (
                 <Empty>
                     <EmptyHeader>

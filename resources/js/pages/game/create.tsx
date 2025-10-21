@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,6 +9,7 @@ import {
     ItemTitle,
 } from '@/components/ui/item';
 import { Separator } from '@/components/ui/separator';
+import { Spinner } from '@/components/ui/spinner';
 import { useList } from '@/hooks/use-list';
 import FrontLayout from '@/layouts/front-layout';
 import { chunk } from '@/lib/array';
@@ -18,7 +19,7 @@ import games from '@/routes/game';
 import type { PlayerOutData } from '@/types';
 import { Form } from '@inertiajs/react';
 import {
-    AwardIcon,
+    BadgePlusIcon,
     CircleAlertIcon,
     PlusIcon,
     TrashIcon,
@@ -42,13 +43,18 @@ function CreateGame({ players }: Props) {
     return (
         <div className="space-y-2">
             <h1 className="flex items-center gap-1 text-lg font-bold">
-                <AwardIcon />
+                <BadgePlusIcon />
                 Créer un match
             </h1>
-            <p className="text-muted-foreground">
-                Sélectionnez les joueurs qui participent au match (commencez par la première équipe)
-            </p>
-            <Game players={selectedPlayers} onDelete={togglePlayer} />
+            {selectedPlayers.length > 0 && (
+                <Game players={selectedPlayers} onDelete={togglePlayer} />
+            )}
+            {selectedPlayers.length < 4 && (
+                <p className="my-4 text-muted-foreground">
+                    Sélectionnez les joueurs qui participent au match (commencez
+                    par la première équipe)
+                </p>
+            )}
             {selectedPlayers.length < maxPlayers && (
                 <div>
                     {availablePlayers.map((player) => (
@@ -62,7 +68,8 @@ function CreateGame({ players }: Props) {
                                     {player.name}
                                 </ItemTitle>
                                 <ItemDescription className="flex items-center text-sm">
-                                    #{player.rank}
+                                    {player.games_count > 0 &&
+                                        `#${player.rank}`}
                                 </ItemDescription>
                             </ItemContent>
                             <ItemActions>
@@ -97,83 +104,112 @@ function Game({ players, onDelete }: GameProps) {
     const teams = chunk(players, 2);
     const isMatchReady = players.length === TEAM_SIZE * 2;
     const teamRatings = chunk(players.map(playerToRating), 2);
-    const winChance = isMatchReady ? winProbability(teamRatings[0], teamRatings[1]) : null;
+    const winChance = isMatchReady
+        ? winProbability(teamRatings[0], teamRatings[1])
+        : null;
     return (
         <Form className="space-y-4" action={games.store()}>
-            {winChance && (
-                <WinProbability chance={winChance}/>
-            )}
-            <div className="mx-auto flex w-max items-center gap-4">
-                {teams.map((team, k) => (
-                    <Fragment key={team[0].id}>
-                        <div className="space-y-4">
-                            {team.map((player) => (
-                                <Item key={player.id} variant="outline">
-                                    <ItemContent>
-                                        <ItemTitle>{player.name}</ItemTitle>
-                                    </ItemContent>
-                                    <ItemActions>
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            type="button"
-                                            className="size-8 rounded-sm"
-                                            onClick={() => onDelete(player)}
-                                        >
-                                            <TrashIcon className="size-3" />
-                                        </Button>
-                                    </ItemActions>
-                                    <input
-                                        name={`team${k + 1}[]`}
-                                        type="hidden"
-                                        value={player.id}
+            {({ processing }) => (
+                <>
+                    {winChance && <WinProbability chance={winChance} />}
+                    <div
+                        className="grid items-center gap-x-4"
+                        style={{ gridTemplateColumns: '1fr max-content 1fr' }}
+                    >
+                        <h2 className="mb-2 text-center font-bold">Equipe 1</h2>
+                        <div />
+                        <h2 className="mb-2 text-center font-bold">Equipe 2</h2>
+                        {teams.map((team, k) => (
+                            <Fragment key={team[0].id}>
+                                <div className="space-y-4">
+                                    {team.map((player) => (
+                                        <Item key={player.id} variant="outline">
+                                            <ItemContent>
+                                                <ItemTitle>
+                                                    {player.name}
+                                                </ItemTitle>
+                                            </ItemContent>
+                                            <ItemActions>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    type="button"
+                                                    className="size-8 rounded-sm"
+                                                    onClick={() =>
+                                                        onDelete(player)
+                                                    }
+                                                >
+                                                    <TrashIcon className="size-3" />
+                                                </Button>
+                                            </ItemActions>
+                                            <input
+                                                name={`team${k + 1}[]`}
+                                                type="hidden"
+                                                value={player.id}
+                                            />
+                                        </Item>
+                                    ))}
+                                </div>
+                                {k === 0 && teams.length > 1 && (
+                                    <XIcon
+                                        className={cn('text-muted-foreground')}
                                     />
-                                </Item>
-                            ))}
-                            {isMatchReady && <Separator />}
-                            {isMatchReady && (
-                                <Input
-                                    required
-                                    type="number"
-                                    placeholder="Score"
-                                    name={`team${k + 1}_score`}
-                                    className="w-30"
-                                />
-                            )}
-                        </div>
-                        {k === 0 && teams.length > 1 && (
-                            <XIcon
-                                className={cn(
-                                    'text-muted-foreground',
-                                    isMatchReady && '-mt-16',
                                 )}
-                            />
+                            </Fragment>
+                        ))}
+                        {isMatchReady && (
+                            <>
+                                <Separator className="my-4" />
+                                <div />
+                                <Separator className="my-4" />
+                            </>
                         )}
-                    </Fragment>
-                ))}
-            </div>
-            {isMatchReady && (
-                <Button className="w-full" type="submit">
-                    <PlusIcon /> Enregistrer le résultat
-                </Button>
+                        {isMatchReady &&
+                            teams.map((team, k) => (
+                                <Fragment key={team[0].id}>
+                                    <Input
+                                        min={0}
+                                        required
+                                        type="number"
+                                        placeholder="Sets gagnés"
+                                        name={`team${k + 1}_score`}
+                                        className="w-full text-sm"
+                                    />
+                                    {k === 0 && teams.length > 1 && <div />}
+                                </Fragment>
+                            ))}
+                    </div>
+                    {isMatchReady && (
+                        <Button
+                            className="w-full"
+                            type="submit"
+                            disabled={processing}
+                        >
+                            {processing ? <Spinner /> : <PlusIcon />}{' '}
+                            Enregistrer le résultat
+                        </Button>
+                    )}
+                </>
             )}
         </Form>
     );
 }
 
-function WinProbability({chance}: {chance: number}) {
+function WinProbability({ chance }: { chance: number }) {
     const favoriteTeam = chance > 0.5 ? 1 : 2;
-    const winingTeamChange = chance > 0.5 ? chance : 1 - chance
+    const winingTeamChange = chance > 0.5 ? chance : 1 - chance;
     return (
         <Alert>
             <CircleAlertIcon />
             <AlertDescription>
                 <p>
-                    L'<strong>équipe {favoriteTeam}</strong> est favorite avec <strong>{Math.round(winingTeamChange * 100)}%</strong> de chance de gagner.
+                    L'<strong>équipe {favoriteTeam}</strong> est favorite avec{' '}
+                    <strong>{Math.round(winingTeamChange * 100)}%</strong> de
+                    chance de gagner.
                 </p>
             </AlertDescription>
         </Alert>
-    )
+    );
 }
 
 function playerToRating(player: PlayerOutData) {

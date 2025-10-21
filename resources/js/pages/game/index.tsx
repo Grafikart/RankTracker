@@ -1,9 +1,9 @@
-import type { GameOutData, PaginatedCollection } from '@/types';
-import type { ReactNode } from 'react';
-import FrontLayout from '@/layouts/front-layout';
 import { GameCard } from '@/components/game-card';
-import { LandPlotIcon } from 'lucide-react';
+import FrontLayout from '@/layouts/front-layout';
+import type { GameOutData, PaginatedCollection } from '@/types';
 import { InfiniteScroll } from '@inertiajs/react';
+import { LandPlotIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 type Props = {
     games: PaginatedCollection<GameOutData>;

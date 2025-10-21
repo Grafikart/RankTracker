@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         );
 
         Player::factory(10)
-            ->sequence(fn ($sequence) => ['name' => sprintf("Player %s", $sequence->index + 1)])
+            ->sequence(fn ($sequence) => ['name' => sprintf('Player %s', $sequence->index + 1)])
             ->create();
     }
 }

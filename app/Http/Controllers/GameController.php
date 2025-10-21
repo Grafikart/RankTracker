@@ -6,8 +6,10 @@ use App\Data\In\GameStoreData;
 use App\Data\Out\GameOutData;
 use App\Data\Out\PlayerOutData;
 use App\Models\Game;
+use App\Models\GamePlayer;
 use App\Models\Player;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Laragod\Skills\GameInfo;
 use Laragod\Skills\Player as RankingPlayer;
@@ -20,20 +22,24 @@ class GameController extends Controller
     public function index()
     {
         $games = Game::with('players')->orderByDesc('created_at')->paginate(10);
+
         return Inertia::render('game/index', [
-            'games' => Inertia::scroll(fn () => GameOutData::collect($games))
+            'games' => Inertia::scroll(fn () => GameOutData::collect($games)),
         ]);
     }
 
     public function create()
     {
+        Gate::authorize('create', Game::class);
+
         return Inertia::render('game/create', [
-            'players' => PlayerOutData::collectRanked(Player::all())
+            'players' => PlayerOutData::collectRanked(Player::all()),
         ]);
     }
 
     public function store(GameStoreData $data)
     {
+        Gate::authorize('create', Game::class);
         $playerIds = collect([...$data->team1, ...$data->team2])->flatten();
         $players = Player::whereIn('id', $playerIds)
             ->get()
@@ -44,8 +50,8 @@ class GameController extends Controller
         // Build teams using the TrueSkill ranking system
         $teams = collect([$data->team1, $data->team2])
             ->map(function (array $team) use ($playersById, $rankingPlayers) {
-                $t = new Team();
-                foreach($team as $playerId) {
+                $t = new Team;
+                foreach ($team as $playerId) {
                     $player = $playersById->get($playerId);
                     assert($player instanceof Player);
                     $t = $t->addPlayer(
@@ -53,12 +59,13 @@ class GameController extends Controller
                         new Rating($player->mu, $player->sigma)
                     );
                 }
+
                 return $t;
             });
 
         // Compute the new ratings
-        $gameInfo = new GameInfo();
-        $calculator = new TwoTeamTrueSkillCalculator();
+        $gameInfo = new GameInfo;
+        $calculator = new TwoTeamTrueSkillCalculator;
         $ranks = $data->team1_score > $data->team2_score ? [1, 2] : [2, 1];
         $ratings = $calculator->calculateNewRatings($gameInfo, $teams->toArray(), $ranks);
 
@@ -70,8 +77,8 @@ class GameController extends Controller
             ]);
 
             // Attach players to the game
-            foreach([$data->team1, $data->team2] as $k => $team) {
-                foreach($team as $playerId) {
+            foreach ([$data->team1, $data->team2] as $k => $team) {
+                foreach ($team as $playerId) {
                     $player = $playersById->get($playerId);
                     assert($player instanceof Player);
                     $rating = $ratings->getRating($rankingPlayers[$player->id]);
@@ -79,11 +86,11 @@ class GameController extends Controller
 
                     // Attach the player to the game
                     $game->players()->attach($player, [
-                        'team' => $k+1,
+                        'team' => $k + 1,
                         'state' => json_encode([
                             'previous_ranking' => [$player->mu, $player->sigma],
                             'new_ranking' => [$rating->getMean(), $rating->getStandardDeviation()],
-                        ])
+                        ]),
                     ]);
 
                     // Update the player's rating
@@ -96,6 +103,22 @@ class GameController extends Controller
             }
         });
 
-        return to_route('player.index')->with('success', 'Le match a bien été enregistré');
+        return to_route('game.index')->with('success', 'Le match a bien été enregistré');
+    }
+
+    public function destroy(Game $game)
+    {
+        DB::transaction(function () use ($game) {
+            foreach ($game->players as $player) {
+                $pivot = $player->pivot;
+                assert($pivot instanceof GamePlayer);
+                $pivot->resetPlayer($player);
+                $player->save();
+            }
+            $game->delete();
+        });
+
+        return to_route('game.index')->with('success', 'Le match a bien été annulé');
+
     }
 }

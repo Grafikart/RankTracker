@@ -12,14 +12,13 @@ class PlayerOutData extends Data
 {
     public function __construct(
         public int $id,
-        public int $rank = 0,
+        public int $rank,
         public string $name,
         public float $mu,
         public float $sigma,
         public float $score,
         public int $games_count,
-    ) {
-    }
+    ) {}
 
     public static function collectRanked(Collection $items): array
     {

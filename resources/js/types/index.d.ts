@@ -13,7 +13,7 @@ export type PaginatedCollection<T> = {
     links: {
         url: string | null;
         label: string;
-        page: number | null
+        page: number | null;
         active: boolean;
     }[];
 };

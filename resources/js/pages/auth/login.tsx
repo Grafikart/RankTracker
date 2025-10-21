@@ -1,28 +1,31 @@
+import AppLogoIcon from '@/components/app-logo-icon';
 import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import AuthLayout from '@/layouts/auth-layout';
-import { register } from '@/routes';
+import FrontLayout from '@/layouts/front-layout';
+import { home } from '@/routes';
 import { store } from '@/routes/login';
-import { request } from '@/routes/password';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 
 interface LoginProps {
     status?: string;
     canResetPassword: boolean;
 }
 
-export default function Login({ status, canResetPassword }: LoginProps) {
+function Login({ status }: LoginProps) {
     return (
-        <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
-        >
-            <Head title="Log in" />
+        <div>
+            <Head title="Se connecter" />
+            <Link
+                href={home()}
+                className="flex flex-col items-center gap-2 font-medium"
+            >
+                <AppLogoIcon className="size-30 fill-current text-[var(--foreground)] dark:text-white" />
+            </Link>
 
             <Form
                 {...store.form()}
@@ -33,7 +36,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">Identifiant</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -50,15 +53,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             <div className="grid gap-2">
                                 <div className="flex items-center">
                                     <Label htmlFor="password">Password</Label>
-                                    {canResetPassword && (
-                                        <TextLink
-                                            href={request()}
-                                            className="ml-auto text-sm"
-                                            tabIndex={5}
-                                        >
-                                            Forgot password?
-                                        </TextLink>
-                                    )}
                                 </div>
                                 <Input
                                     id="password"
@@ -67,7 +61,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder="Mot de passe"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -78,7 +72,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember">
+                                    Se souvenir de moi
+                                </Label>
                             </div>
 
                             <Button
@@ -89,15 +85,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
+                                Se connecter
                             </Button>
-                        </div>
-
-                        <div className="text-center text-sm text-muted-foreground">
-                            Don't have an account?{' '}
-                            <TextLink href={register()} tabIndex={5}>
-                                Sign up
-                            </TextLink>
                         </div>
                     </>
                 )}
@@ -108,6 +97,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     {status}
                 </div>
             )}
-        </AuthLayout>
+        </div>
     );
 }
+
+Login.layout = (page: ReactNode) => <FrontLayout>{page}</FrontLayout>;
+
+export default Login;

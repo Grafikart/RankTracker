@@ -19,11 +19,11 @@ return new class extends Migration
         });
 
         Schema::create('game_player', function (Blueprint $table) {
-           $table->primary(['game_id', 'player_id']);
-           $table->foreignIdFor(\App\Models\Game::class)->constrained()->cascadeOnDelete();
-           $table->foreignIdFor(\App\Models\Player::class)->constrained()->cascadeOnDelete();
-           $table->json('state')->nullable();
-           $table->integer('team')->default(0);
+            $table->primary(['game_id', 'player_id']);
+            $table->foreignIdFor(\App\Models\Game::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(\App\Models\Player::class)->constrained()->cascadeOnDelete();
+            $table->json('state')->nullable();
+            $table->integer('team')->default(0);
         });
     }
 

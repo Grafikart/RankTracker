@@ -17,7 +17,7 @@ return new class extends Migration
             $table->float('mu')->default(25);
             $table->float('sigma')->default(8.333);
             $table->integer('games_count')->default(0);
-            $table->timestamp("last_match_at")->nullable();
+            $table->timestamp('last_match_at')->nullable();
             $table->timestamps();
         });
     }

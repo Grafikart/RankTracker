@@ -6,7 +6,11 @@ export function useList<T>(initialValue: T[] = []) {
     return [
         state,
         useCallback((newValue: T) => {
-            setState((items) => (items.includes(newValue) ? items.filter((item) => item !== newValue) : [...items, newValue]));
+            setState((items) =>
+                items.includes(newValue)
+                    ? items.filter((item) => item !== newValue)
+                    : [...items, newValue],
+            );
         }, []),
         setState,
     ] as const;

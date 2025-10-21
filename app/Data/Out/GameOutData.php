@@ -19,13 +19,15 @@ class GameOutData extends Data
         public int $team1_score,
         public int $team2_score,
         public CarbonImmutable $created_at,
-    ) {
-    }
+        public bool $deletable,
+    ) {}
 
-    public static function fromModel(Game $game) {
+    public static function fromModel(Game $game)
+    {
         return self::from(
             $game,
             [
+                'deletable' => request()->user()?->can('delete', $game),
                 'team1' => $game->players->where('pivot.team', 1)->values(),
                 'team2' => $game->players->where('pivot.team', 2)->values(),
             ],

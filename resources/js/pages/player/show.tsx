@@ -6,10 +6,8 @@ import {
     EmptyContent,
     EmptyDescription,
     EmptyHeader,
-    EmptyMedia,
     EmptyTitle,
 } from '@/components/ui/empty';
-import { Icon } from '@/components/ui/icon';
 import { ImageInput } from '@/components/ui/image-input';
 import { ValidationErrors } from '@/components/ui/validation-errors';
 import FrontLayout from '@/layouts/front-layout';
@@ -17,7 +15,7 @@ import { create } from '@/routes/game';
 import { update } from '@/routes/player';
 import type { GameOutData, PaginatedCollection, PlayerOutData } from '@/types';
 import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
-import { BadgePlusIcon } from 'lucide-react';
+import { BadgePlusIcon, LandPlotIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 type Props = {
@@ -55,9 +53,10 @@ function show({ player, games, editable }: Props) {
             {games.data.length === 0 && (
                 <Empty>
                     <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                            <Icon />
-                        </EmptyMedia>
+                        <LandPlotIcon
+                            size={24}
+                            className="mb-2 size-12 text-muted-foreground/80"
+                        />
                         <EmptyTitle>Aucun matchs</EmptyTitle>
                         <EmptyDescription>
                             {player.name} n'a pas encore joué de matchs :(

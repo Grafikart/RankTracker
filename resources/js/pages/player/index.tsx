@@ -97,7 +97,7 @@ function PlayerCard({ player }: { player: PlayerOutData }) {
         return (
             <Item variant="outline" className="rounded-md" asChild>
                 <Link href={show({ player: player.id })}>
-                    <ItemContent className="flex-row justify-between gap-2">
+                    <ItemContent className="flex-row justify-between gap-2 items-center">
                         <ItemTitle className="font-semibold">
                             <PlayerAvatar {...player} />
                             {player.name}
@@ -112,7 +112,7 @@ function PlayerCard({ player }: { player: PlayerOutData }) {
     return (
         <Item variant="outline" className="rounded-md" asChild>
             <Link href={show({ player: player.id })}>
-                <ItemContent className="flex-row gap-2">
+                <ItemContent className="flex-row gap-2 items-center">
                     <ItemTitle className="font-semibold">
                         <PlayerAvatar {...player} />
                         {player.name}

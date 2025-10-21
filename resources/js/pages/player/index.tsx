@@ -13,7 +13,7 @@ import FrontLayout from '@/layouts/front-layout';
 import gameRoutes from '@/routes/game';
 import { show, store } from '@/routes/player';
 import type { PlayerOutData } from '@/types';
-import { Form, Link } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import {
     AwardIcon,
     CoinsIcon,
@@ -34,6 +34,7 @@ function index({
 }) {
     return (
         <div className="space-y-5">
+            <Head title="Classement" />
             <div className="flex">
                 <h1 className="flex items-center gap-1 text-lg font-bold">
                     <AwardIcon />

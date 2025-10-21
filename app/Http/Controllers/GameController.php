@@ -31,9 +31,13 @@ class GameController extends Controller
     public function create()
     {
         Gate::authorize('create', Game::class);
+        $players = Player::query()
+            ->orderBy('name')
+            ->with('media')
+            ->get();
 
         return Inertia::render('game/create', [
-            'players' => PlayerOutData::collectRanked(Player::with('media')->get()),
+            'players' => PlayerOutData::collectRanked($players),
         ]);
     }
 

@@ -13,12 +13,17 @@ lint:
 .PHONY: deploy
 deploy: ## Deploy a new version on the server
 	bun run build
-	rsync -avH ./public/build/ -e ssh $(SERVER_NAME):~/sites/$(SERVER_DOMAIN)/public/build/
+	rsync -avH ./public/build/ $(SERVER_NAME):~/sites/$(SERVER_DOMAIN)/public/build/
+	rsync -avH ./storage/app/public $(SERVER_NAME):~/sites/$(SERVER_DOMAIN)/storage/app/public
 	ssh -A $(SERVER_NAME) 'cd ~/sites/$(SERVER_DOMAIN) && git pull origin main && make install'
 
 .PHONY: pushdb
 pushdb: ## Send the local database online
-	 rsync -avH ./database/database.sqlite -e ssh $(SERVER_NAME):~/sites/$(SERVER_DOMAIN)/database/database.sqlite
+	 rsync -avH ./database/database.sqlite $(SERVER_NAME):~/sites/$(SERVER_DOMAIN)/database/database.sqlite
+
+.PHONY: pulldb
+pulldb: ## Send the local database online
+	 rsync -avH $(SERVER_NAME):~/sites/$(SERVER_DOMAIN)/database/database.sqlite ./database/database.sqlite
 
 .PHONY: install
 install: ## Install the project (on infomaniak)

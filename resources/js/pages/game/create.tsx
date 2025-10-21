@@ -1,3 +1,4 @@
+import { PlayerAvatar } from '@/components/player-avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,7 @@ import { TEAM_SIZE } from '@/lib/game';
 import { cn } from '@/lib/utils';
 import games from '@/routes/game';
 import type { PlayerOutData } from '@/types';
-import { Form } from '@inertiajs/react';
+import { Form, Head } from '@inertiajs/react';
 import {
     BadgePlusIcon,
     CircleAlertIcon,
@@ -42,9 +43,10 @@ function CreateGame({ players }: Props) {
 
     return (
         <div className="space-y-2">
-            <h1 className="flex items-center gap-1 text-lg font-bold">
+            <Head title="Enregistrer un match" />
+            <h1 className="flex items-center gap-2 text-lg font-bold">
                 <BadgePlusIcon />
-                Créer un match
+                Enregistrer un match
             </h1>
             {selectedPlayers.length > 0 && (
                 <Game players={selectedPlayers} onDelete={togglePlayer} />
@@ -65,6 +67,7 @@ function CreateGame({ players }: Props) {
                         >
                             <ItemContent className="flex-row gap-2">
                                 <ItemTitle className="font-semibold">
+                                    <PlayerAvatar {...player} />
                                     {player.name}
                                 </ItemTitle>
                                 <ItemDescription className="flex items-center text-sm">

@@ -15,6 +15,7 @@ class PlayerController extends Controller
     public function index()
     {
         $players = Player::query()
+            ->orderBy('name')
             ->with('media')
             ->get()
             ->sortByDesc('score');

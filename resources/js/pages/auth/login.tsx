@@ -39,13 +39,13 @@ function Login({ status }: LoginProps) {
                                 <Label htmlFor="email">Identifiant</Label>
                                 <Input
                                     id="email"
-                                    type="email"
+                                    type="text"
                                     name="email"
                                     required
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder=""
                                 />
                                 <InputError message={errors.email} />
                             </div>

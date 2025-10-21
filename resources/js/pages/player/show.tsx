@@ -16,7 +16,7 @@ import FrontLayout from '@/layouts/front-layout';
 import { create } from '@/routes/game';
 import { update } from '@/routes/player';
 import type { GameOutData, PaginatedCollection, PlayerOutData } from '@/types';
-import { InfiniteScroll, Link, router } from '@inertiajs/react';
+import { Head, InfiniteScroll, Link, router } from '@inertiajs/react';
 import { BadgePlusIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -36,6 +36,7 @@ function show({ player, games, editable }: Props) {
 
     return (
         <div className="space-y-6">
+            <Head title={`Matchs de ${player.name}`} />
             <h1 className="flex items-center gap-4 text-2xl font-normal text-muted-foreground">
                 {editable ? (
                     <ImageInput

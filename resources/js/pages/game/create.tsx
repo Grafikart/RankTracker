@@ -44,7 +44,7 @@ function CreateGame({ players }: Props) {
     return (
         <div className="space-y-2">
             <Head title="Enregistrer un match" />
-            <h1 className="flex items-center gap-2 text-lg font-bold">
+            <h1 className="flex items-center gap-2 text-lg font-bold mb-4">
                 <BadgePlusIcon />
                 Enregistrer un match
             </h1>
@@ -124,15 +124,20 @@ function Game({ players, onDelete }: GameProps) {
                         <h2 className="mb-2 text-center font-bold">Equipe 2</h2>
                         {teams.map((team, k) => (
                             <Fragment key={team[0].id}>
-                                <div className="space-y-4">
+                                <div className="min-w-0 space-y-4">
                                     {team.map((player) => (
-                                        <Item key={player.id} variant="outline">
-                                            <ItemContent>
-                                                <ItemTitle>
+                                        <Item
+                                            key={player.id}
+                                            variant="outline"
+                                            className="flex-nowrap gap-2 p-3"
+                                        >
+                                            <ItemTitle className="min-w-0">
+                                                <PlayerAvatar {...player} />
+                                                <span className="line-clamp-2 text-ellipsis">
                                                     {player.name}
-                                                </ItemTitle>
-                                            </ItemContent>
-                                            <ItemActions>
+                                                </span>
+                                            </ItemTitle>
+                                            <ItemActions className="ml-auto">
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
@@ -201,6 +206,9 @@ function Game({ players, onDelete }: GameProps) {
 function WinProbability({ chance }: { chance: number }) {
     const favoriteTeam = chance > 0.5 ? 1 : 2;
     const winingTeamChange = chance > 0.5 ? chance : 1 - chance;
+    if (chance > 0.47 && chance < 0.53) {
+        return null;
+    }
     return (
         <Alert>
             <CircleAlertIcon />
